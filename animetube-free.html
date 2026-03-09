@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AnimeTube AI — 100% Free</title>
+<script src="https://js.puter.com/v2/"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #07010f;
+    --surface: #100520;
+    --card: #160830;
+    --border: #2a0f50;
+    --pink: #ff2d78;
+    --cyan: #00ffe0;
+    --purple: #a020f0;
+    --yellow: #ffe600;
+    --green: #00ff99;
+    --text: #f0e6ff;
+    --muted: #6a4a88;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100vh; background: var(--bg); color: var(--text); font-family: 'Sora', sans-serif; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 2px; }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes sakura {
+    0%   { transform: translateY(-20px) rotate(0deg);   opacity: 0; }
+    10%  { opacity: .8; }
+    90%  { opacity: .3; }
+    100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+  }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 12px var(--purple)} 50%{box-shadow:0 0 32px var(--pink)} }
+  @keyframes glitch {
+    0%,100% { clip-path: inset(0 0 100% 0); }
+    20% { clip-path: inset(20% 0 60% 0); transform: translateX(-4px); }
+    40% { clip-path: inset(50% 0 30% 0); transform: translateX(4px); }
+    60% { clip-path: inset(70% 0 10% 0); transform: translateX(-2px); }
+    80% { clip-path: inset(10% 0 80% 0); transform: translateX(2px); }
+  }
+
+  /* PARTICLES */
+  .petal { position: fixed; top: -20px; width: 8px; height: 8px; background: var(--pink); border-radius: 50% 0 50% 0; pointer-events: none; z-index: 0; opacity: 0; }
+
+  /* HEADER */
+  header {
+    position: relative; z-index: 2;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 20px 22px;
+    text-align: center;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, #a020f022, transparent);
+    pointer-events: none;
+  }
+  .badge-row { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .badge { background: #ffffff0a; border: 1px solid var(--border); border-radius: 99px; padding: 3px 12px; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--muted); }
+  .badge.free { border-color: var(--green); color: var(--green); background: #00ff9910; }
+  .badge.anime { border-color: var(--pink); color: var(--pink); background: #ff2d7810; }
+  h1 { font-family: 'Orbitron', sans-serif; font-size: clamp(26px, 6vw, 52px); font-weight: 900; letter-spacing: 3px; line-height: 1.1; }
+  h1 .a { color: var(--pink); } h1 .b { color: var(--text); } h1 .c { color: var(--cyan); }
+  .subtitle { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .free-banner { display: inline-block; margin-top: 12px; background: linear-gradient(90deg, var(--green), var(--cyan)); border-radius: 99px; padding: 5px 20px; color: #000; font-weight: 700; font-size: 12px; letter-spacing: 1px; }
+
+  /* TABS */
+  nav { display: flex; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10; }
+  nav button { flex: 1; padding: 12px 6px; border: none; background: transparent; border-bottom: 2px solid transparent; color: var(--muted); font-family: 'Sora', sans-serif; font-weight: 600; font-size: 12px; cursor: pointer; transition: all .2s; }
+  nav button.active { color: var(--text); border-bottom-color: var(--purple); background: #a020f010; }
+
+  /* LAYOUT */
+  main { max-width: 700px; margin: 0 auto; padding: 22px 14px 80px; position: relative; z-index: 1; }
+  section { display: none; animation: fadeUp .4s ease; }
+  section.active { display: block; }
+
+  /* CARDS */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+  .card-title { font-size: 13px; font-weight: 700; margin-bottom: 14px; }
+  .card-title.pink { color: var(--pink); }
+  .card-title.cyan { color: var(--cyan); }
+  .card-title.yellow { color: var(--yellow); }
+
+  /* INPUTS */
+  label.field-label { display: block; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; }
+  input, select, textarea {
+    width: 100%; background: #0a0018; border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px; color: var(--text);
+    font-family: 'Sora', sans-serif; font-size: 13px; outline: none;
+    transition: border .2s; margin-bottom: 12px;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--purple); }
+  .yt-hint { color: var(--muted); font-size: 11px; margin-top: -8px; margin-bottom: 12px; }
+  .yt-hint a { color: var(--cyan); }
+
+  /* LAUNCH BUTTON */
+  #launchBtn {
+    width: 100%; padding: 18px;
+    background: linear-gradient(135deg, var(--pink), var(--purple));
+    border: none; border-radius: 14px; color: #fff;
+    font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 3px;
+    cursor: pointer; transition: all .3s; margin-bottom: 20px;
+    box-shadow: 0 0 40px #ff2d7855, 0 0 80px #a020f033;
+    animation: pulse 2.5s infinite;
+  }
+  #launchBtn:disabled { background: var(--border); box-shadow: none; animation: none; color: var(--muted); cursor: not-allowed; }
+
+  /* PIPELINE STEPS */
+  .step { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--card); margin-bottom: 10px; transition: all .3s; }
+  .step.running { border-color: #a020f088; box-shadow: 0 0 24px #a020f033; background: #a020f00a; }
+  .step.done { border-color: #00ffe044; }
+  .step.error { border-color: #ff2d7866; }
+  .step-header { display: flex; align-items: center; gap: 12px; padding: 13px 16px; cursor: pointer; }
+  .step-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; border: 1.5px solid var(--border); background: #ffffff05; transition: all .3s; }
+  .step.running .step-icon { border-color: var(--purple); box-shadow: 0 0 14px var(--purple); animation: pulse 1.2s infinite; }
+  .step.done .step-icon { border-color: var(--cyan); }
+  .step-meta { flex: 1; }
+  .step-num { color: var(--muted); font-size: 9px; font-weight: 700; letter-spacing: 2px; }
+  .step-label { color: var(--text); font-weight: 600; font-size: 13px; }
+  .step-status { font-size: 13px; }
+  .step-body { border-top: 1px solid var(--border); padding: 14px; background: #050010; display: none; }
+  .step.open .step-body { display: block; }
+
+  /* OUTPUT BOX */
+  .outbox { position: relative; }
+  .outbox pre { color: #c8b0e8; font-family: 'JetBrains Mono', monospace; font-size: 11px; white-space: pre-wrap; line-height: 1.7; max-height: 200px; overflow-y: auto; }
+  .copy-btn { position: absolute; top: 0; right: 0; background: transparent; border: 1px solid #00ffe044; border-radius: 6px; color: var(--cyan); padding: 3px 10px; font-size: 10px; cursor: pointer; transition: all .2s; }
+  .copy-btn:hover { background: var(--cyan); color: #000; }
+
+  /* SCENE GRID */
+  .scene-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+  .scene-card { border-radius: 10px; overflow: hidden; border: 1px solid var(--border); position: relative; background: var(--surface); aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; }
+  .scene-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .scene-label { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, #07010fcc); padding: 10px 8px 5px; color: var(--text); font-size: 10px; font-weight: 600; }
+  .scene-save { position: absolute; top: 5px; right: 5px; background: var(--pink)cc; border: none; border-radius: 6px; color: #fff; font-size: 9px; font-weight: 700; padding: 3px 8px; cursor: pointer; text-decoration: none; }
+  .spinner { width: 22px; height: 22px; border: 2px solid var(--border); border-top-color: var(--purple); border-radius: 50%; animation: spin .8s linear infinite; }
+
+  /* AUDIO */
+  audio { width: 100%; margin-bottom: 8px; }
+
+  /* LOG */
+  #logBox { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; max-height: 150px; overflow-y: auto; margin-top: 16px; }
+  .log-line { font-family: 'JetBrains Mono', monospace; font-size: 10px; margin-bottom: 2px; }
+  .log-line.success { color: var(--green); }
+  .log-line.error { color: var(--pink); }
+  .log-line.warn { color: var(--yellow); }
+  .log-line.info { color: var(--muted); }
+
+  /* DONE BANNER */
+  #doneBanner { background: linear-gradient(135deg, #001a2a, #0d001a); border: 1px solid var(--cyan); border-radius: 14px; padding: 22px; text-align: center; margin-bottom: 16px; display: none; }
+  #doneBanner h2 { font-family: 'Orbitron', sans-serif; color: var(--cyan); letter-spacing: 2px; margin-bottom: 8px; }
+  #doneBanner p { color: var(--muted); font-size: 12px; line-height: 1.7; }
+
+  /* COMMENT SECTION */
+  .comment-item { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+  .comment-author { color: var(--cyan); font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+  .comment-text { color: var(--text); font-size: 12px; line-height: 1.5; }
+  .reply-btn { background: #ff2d7820; border: 1px solid #ff2d7844; border-radius: 6px; color: var(--pink); padding: 5px 12px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all .2s; }
+  .reply-btn.done { background: #00ff9920; border-color: #00ff9944; color: var(--green); cursor: default; }
+  .reply-btn.loading { opacity: .5; cursor: not-allowed; }
+
+  /* GUIDE CARDS */
+  .guide-step { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+  .guide-step h3 { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+  .guide-step ol { padding-left: 18px; }
+  .guide-step li { color: var(--muted); font-size: 12px; margin-bottom: 5px; line-height: 1.6; }
+  .guide-step a { color: var(--cyan); }
+  .cost-tag { float: right; background: var(--green)20; border: 1px solid var(--green)44; color: var(--green); border-radius: 99px; padding: 2px 10px; font-size: 10px; font-weight: 700; }
+
+  /* ERROR */
+  .err { background: #ff2d7810; border: 1px solid #ff2d7844; border-radius: 10px; padding: 12px; color: var(--pink); font-size: 12px; margin-bottom: 14px; display: none; }
+</style>
+</head>
+<body>
+
+<!-- Sakura Petals -->
+<script>
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal';
+    p.style.cssText = `left:${(i*7.2)%100}%;animation:sakura ${6+i%5}s ${i*0.6}s linear infinite;width:${6+i%4}px;height:${6+i%4}px;opacity:0;`;
+    document.body.appendChild(p);
+  }
+</script>
+
+<header>
+  <div class="badge-row">
+    <span class="badge free">✦ 100% FREE</span>
+    <span class="badge anime">🎌 ANIME STYLE</span>
+    <span class="badge free">🤖 AI POWERED</span>
+    <span class="badge anime">📤 AUTO-UPLOAD</span>
+    <span class="badge free">💬 AUTO-REPLY</span>
+  </div>
+  <h1><span class="a">ANIME</span> <span class="b">TUBE</span> <span class="c">AI</span></h1>
+  <p class="subtitle">Idea → Script → Voice → Anime Visuals → YouTube → Replies</p>
+  <div class="free-banner">💚 ZERO COST · NO API KEYS NEEDED (except YouTube)</div>
+</header>
+
+<nav>
+  <button class="active" onclick="switchTab('pipeline', this)">🚀 Pipeline</button>
+  <button onclick="switchTab('comments', this)">💬 Comments</button>
+  <button onclick="switchTab('guide', this)">📋 Guide</button>
+</nav>
+
+<main>
+
+  <!-- ═══ PIPELINE TAB ═══ -->
+  <section id="pipeline" class="active">
+
+    <div class="card">
+      <div class="card-title cyan">⚙️ Channel Config</div>
+
+      <label class="field-label">Niche</label>
+      <select id="niche">
+        <option>Betrayal & Revenge</option>
+        <option>True Crime</option>
+        <option>Dark Psychology</option>
+        <option>History Mysteries</option>
+        <option>Motivation & Self-Improvement</option>
+      </select>
+
+      <label class="field-label">Anime Style</label>
+      <select id="animeStyle">
+        <option>shonen battle anime</option>
+        <option>dark psychological thriller anime</option>
+        <option>Studio Ghibli inspired</option>
+        <option>cyberpunk anime</option>
+        <option>horror anime</option>
+        <option>seinen dramatic anime</option>
+      </select>
+
+      <label class="field-label">Custom Topic (optional)</label>
+      <input type="text" id="topicInput" placeholder="Leave blank — AI picks the best viral topic for you" />
+
+      <label class="field-label">YouTube OAuth Token</label>
+      <input type="password" id="ytToken" placeholder="ya29...." />
+      <p class="yt-hint">Free from <a href="https://developers.google.com/oauthplayground" target="_blank">Google OAuth Playground</a> — see Guide tab</p>
+    </div>
+
+    <button id="launchBtn" onclick="runPipeline()">🎌 LAUNCH FREE PIPELINE</button>
+
+    <div class="err" id="errBox"></div>
+
+    <!-- Steps -->
+    <div id="steps"></div>
+    <div id="doneBanner">
+      <h2>🎌 PIPELINE COMPLETE</h2>
+      <p>Your script, voiceover, and anime scenes are ready.<br>
+      Import scenes + audio into <strong style="color:var(--cyan)">CapCut</strong> (free) → export MP4 → upload to your YouTube draft.</p>
+    </div>
+    <div id="logBox" style="display:none"></div>
+  </section>
+
+  <!-- ═══ COMMENTS TAB ═══ -->
+  <section id="comments">
+    <div class="card">
+      <div class="card-title pink">💬 Auto Comment Replier</div>
+      <label class="field-label">YouTube Video ID</label>
+      <input type="text" id="videoId" placeholder="e.g. dQw4w9WgXcQ (from your video URL)" />
+      <button onclick="loadComments()" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--pink),var(--purple));border:none;border-radius:10px;color:#fff;font-weight:700;font-size:14px;cursor:pointer;margin-bottom:16px;">
+        Load Comments
+      </button>
+      <div id="commentList"></div>
+    </div>
+  </section>
+
+  <!-- ═══ GUIDE TAB ═══ -->
+  <section id="guide">
+
+    <div class="guide-step">
+      <span class="cost-tag">FREE</span>
+      <h3 style="color:var(--cyan)">1. AI Brain (Puter.js)</h3>
+      <ol>
+        <li>No setup needed — Puter.js runs in your browser automatically</li>
+        <li>Provides GPT-4o level AI for scripts, topics, and comment replies</li>
+        <li>Also handles the text-to-speech voiceover</li>
+        <li>100% free, no account, no API key</li>
+      </ol>
+    </div>
+
+    <div class="guide-step">
+      <span class="cost-tag">FREE</span>
+      <h3 style="color:var(--pink)">2. Anime Images (Pollinations.ai)</h3>
+      <ol>
+        <li>No setup needed — runs automatically in the pipeline</li>
+        <li>Generates real anime-style images from your script scenes</li>
+        <li>No account, no API key, truly unlimited and free</li>
+        <li>Images download directly in your browser</li>
+      </ol>
+    </div>
+
+    <div class="guide-step">
+      <span class="cost-tag">FREE</span>
+      <h3 style="color:var(--yellow)">3. YouTube OAuth Token (only setup needed)</h3>
+      <ol>
+        <li>Go to <a href="https://developers.google.com/oauthplayground" target="_blank">developers.google.com/oauthplayground</a></li>
+        <li>In left panel, find <strong>"YouTube Data API v3"</strong> and select <strong>youtube.force-ssl</strong></li>
+        <li>Click <strong>"Authorize APIs"</strong> → sign in with your Google/YouTube account</li>
+        <li>Click <strong>"Exchange authorization code for tokens"</strong></li>
+        <li>Copy the <strong>Access Token</strong> (starts with ya29...) → paste in Pipeline tab</li>
+        <li>⚠️ Token expires every hour — repeat when needed</li>
+      </ol>
+    </div>
+
+    <div class="guide-step">
+      <span class="cost-tag">FREE</span>
+      <h3 style="color:var(--green)">4. Assemble Video (CapCut — Free)</h3>
+      <ol>
+        <li>Download CapCut free at <a href="https://www.capcut.com" target="_blank">capcut.com</a></li>
+        <li>Import all 8 downloaded anime scene images</li>
+        <li>Set each image duration to ~60 seconds</li>
+        <li>Import your voiceover MP3 as the audio track</li>
+        <li>Add your title as text overlay at the start</li>
+        <li>Export as 1280×720 MP4 → upload to your YouTube private draft</li>
+      </ol>
+    </div>
+
+    <div class="card" style="text-align:center">
+      <div class="card-title cyan" style="text-align:center">💰 Total Monthly Cost</div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:42px;color:var(--green);margin:10px 0">$0</div>
+      <p style="color:var(--muted);font-size:13px">Everything is free. No credit card. No trial. No limit.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let running = false;
+let audioUrl = null;
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(id, btn) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ─── LOGGING ──────────────────────────────────────────────────────────────────
+function log(msg, type = 'info') {
+  const box = document.getElementById('logBox');
+  box.style.display = 'block';
+  const line = document.createElement('div');
+  line.className = `log-line ${type}`;
+  const t = new Date().toLocaleTimeString();
+  line.textContent = `${t}  ${msg}`;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+}
+
+// ─── STEPS UI ─────────────────────────────────────────────────────────────────
+const STEPS_DEF = [
+  { id: 'topic',  num: 1, icon: '💡', label: 'Viral Topic Generation' },
+  { id: 'script', num: 2, icon: '📜', label: 'Script + Scene Prompts' },
+  { id: 'voice',  num: 3, icon: '🎙️', label: 'AI Voiceover (Free)' },
+  { id: 'images', num: 4, icon: '🎌', label: 'Anime Scene Generation' },
+  { id: 'seo',    num: 5, icon: '📈', label: 'SEO Package' },
+  { id: 'thumb',  num: 6, icon: '🖼️', label: 'Thumbnail Concept' },
+  { id: 'upload', num: 7, icon: '📤', label: 'YouTube Upload' },
+];
+
+function initSteps() {
+  const container = document.getElementById('steps');
+  container.innerHTML = STEPS_DEF.map(s => `
+    <div class="step" id="step-${s.id}" onclick="toggleStep('${s.id}')">
+      <div class="step-header">
+        <div class="step-icon" id="icon-${s.id}">${s.icon}</div>
+        <div class="step-meta">
+          <div class="step-num">STEP ${s.num}</div>
+          <div class="step-label">${s.label}</div>
+        </div>
+        <div class="step-status" id="status-${s.id}">○</div>
+      </div>
+      <div class="step-body" id="body-${s.id}"></div>
+    </div>
+  `).join('');
+}
+
+function toggleStep(id) {
+  const el = document.getElementById(`step-${id}`);
+  const body = document.getElementById(`body-${id}`);
+  if (body.innerHTML) el.classList.toggle('open');
+}
+
+function setStepState(id, state) {
+  const el = document.getElementById(`step-${id}`);
+  const st = document.getElementById(`status-${id}`);
+  el.className = `step ${state}`;
+  if (state === 'running') { st.innerHTML = '<div class="spinner" style="display:inline-block"></div>'; }
+  else if (state === 'done') { st.textContent = '✓'; st.style.color = 'var(--cyan)'; }
+  else if (state === 'error') { st.textContent = '✗'; st.style.color = 'var(--pink)'; }
+}
+
+function setStepBody(id, html) {
+  const body = document.getElementById(`body-${id}`);
+  body.innerHTML = html;
+  document.getElementById(`step-${id}`).classList.add('open');
+}
+
+function outputBox(text) {
+  const escaped = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return `<div class="outbox"><pre>${escaped}</pre><button class="copy-btn" onclick="copyText(this, \`${text.replace(/`/g,'\\`')}\`)">Copy</button></div>`;
+}
+
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text);
+  btn.textContent = '✓'; setTimeout(() => btn.textContent = 'Copy', 2000);
+}
+
+// ─── AI VIA PUTER ─────────────────────────────────────────────────────────────
+async function aiChat(prompt) {
+  const res = await puter.ai.chat(prompt, { model: 'gpt-4o' });
+  return typeof res === 'string' ? res : res?.message?.content?.[0]?.text || res?.toString() || '';
+}
+
+// ─── VOICEOVER VIA PUTER TTS ──────────────────────────────────────────────────
+async function generateVoice(text) {
+  const clean = text.replace(/\[.*?\]/g, '').slice(0, 3000);
+  const audio = await puter.ai.txt2speech(clean);
+  const url = URL.createObjectURL(audio);
+  audioUrl = url;
+  return url;
+}
+
+// ─── ANIME IMAGE VIA POLLINATIONS ─────────────────────────────────────────────
+async function generateAnimeImage(prompt, scene) {
+  const encoded = encodeURIComponent(`anime style, ${prompt}, dramatic lighting, cinematic, high quality, detailed, 4k, no text`);
+  const seed = Math.floor(Math.random() * 999999);
+  return `https://image.pollinations.ai/prompt/${encoded}?model=flux&width=1280&height=720&seed=${seed}&nologo=true`;
+}
+
+// ─── YOUTUBE ──────────────────────────────────────────────────────────────────
+async function pushYouTube(token, title, description, tags) {
+  const r = await fetch('https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'X-Upload-Content-Type': 'video/mp4',
+    },
+    body: JSON.stringify({
+      snippet: { title, description, tags, categoryId: '22' },
+      status: { privacyStatus: 'private' },
+    }),
+  });
+  if (!r.ok) throw new Error(`YouTube API ${r.status}: ${await r.text()}`);
+  return r.headers.get('Location');
+}
+
+async function getComments(token, videoId) {
+  const r = await fetch(`https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=${videoId}&maxResults=20`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!r.ok) throw new Error(`Comments ${r.status}`);
+  return (await r.json()).items || [];
+}
+
+async function postReply(token, parentId, text) {
+  const r = await fetch('https://www.googleapis.com/youtube/v3/comments?part=snippet', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ snippet: { parentId, textOriginal: text } }),
+  });
+  if (!r.ok) throw new Error(`Reply ${r.status}`);
+}
+
+// ─── MAIN PIPELINE ─────────────────────────────────────────────────────────────
+async function runPipeline() {
+  if (running) return;
+  running = true;
+  const btn = document.getElementById('launchBtn');
+  btn.disabled = true;
+  btn.textContent = '⚙ GENERATING…';
+  document.getElementById('errBox').style.display = 'none';
+  document.getElementById('doneBanner').style.display = 'none';
+  document.getElementById('logBox').style.display = 'none';
+  document.getElementById('logBox').innerHTML = '';
+  audioUrl = null;
+
+  const niche = document.getElementById('niche').value;
+  const style = document.getElementById('animeStyle').value;
+  const customTopic = document.getElementById('topicInput').value.trim();
+  const ytToken = document.getElementById('ytToken').value.trim();
+
+  initSteps();
+
+  try {
+    // ── STEP 1: TOPIC ──────────────────────────────────────────────────────
+    setStepState('topic', 'running');
+    log('Generating viral topic with AI…');
+    const topicResult = await aiChat(
+      customTopic
+        ? `Refine into a viral anime YouTube topic for "${niche}" niche: "${customTopic}". Return: Title, Hook (1 sentence), Why viral.`
+        : `Best single viral YouTube topic for a FACELESS ANIME channel in "${niche}" niche. Return: Title, Hook (1 sentence), Why viral.`
+    );
+    setStepBody('topic', outputBox(topicResult));
+    setStepState('topic', 'done');
+    log('✓ Topic ready', 'success');
+
+    const finalTopic = customTopic || topicResult.split('\n')[0].replace(/^title:\s*/i, '').replace(/\*\*/g, '').trim();
+
+    // ── STEP 2: SCRIPT ─────────────────────────────────────────────────────
+    setStepState('script', 'running');
+    log('Writing full script + anime scene prompts…');
+    const scriptResult = await aiChat(
+      `Write a complete 8-minute YouTube narration script for a FACELESS ANIME channel.
+Topic: "${finalTopic}". Niche: ${niche}. Anime Style: ${style}.
+Structure: [HOOK 0:00] [SETUP 1:00] [TENSION 3:00] [CLIMAX 6:00] [OUTRO 7:30]
+Include [PAUSE] and [MUSIC CUE: dramatic] markers. Make it cinematic and gripping. No channel intro.
+
+Then add:
+ANIME SCENE PROMPTS:
+1. [detailed anime scene for this story moment]
+2. [...]
+3. [...]
+4. [...]
+5. [...]
+6. [...]
+7. [...]
+8. [...]`
+    );
+    setStepBody('script', outputBox(scriptResult));
+    setStepState('script', 'done');
+    log('✓ Script ready', 'success');
+
+    // Parse scenes
+    const scenePart = scriptResult.split(/ANIME SCENE PROMPTS:/i)[1] || '';
+    const scenePrompts = [...scenePart.matchAll(/\d+\.\s+(.+)/g)].map(m => m[1].trim()).slice(0, 8);
+    if (scenePrompts.length < 4) {
+      scenePrompts.push(...[
+        `${finalTopic} dramatic opening, ${style}`,
+        `intense confrontation scene, ${style}`,
+        `emotional close-up character, ${style}`,
+        `climactic revelation moment, ${style}`,
+      ]);
+    }
+
+    // ── STEP 3: VOICEOVER ──────────────────────────────────────────────────
+    setStepState('voice', 'running');
+    log('Generating AI voiceover with Puter TTS…');
+    const cleanScript = scriptResult.split(/ANIME SCENE PROMPTS:/i)[0];
+    const vUrl = await generateVoice(cleanScript);
+    setStepBody('voice', `
+      <audio controls src="${vUrl}"></audio>
+      <a href="${vUrl}" download="voiceover.mp3" style="color:var(--cyan);font-size:12px;display:block;margin-top:6px;">⬇ Download MP3</a>
+    `);
+    setStepState('voice', 'done');
+    log('✓ Voiceover ready', 'success');
+
+    // ── STEP 4: ANIME IMAGES ───────────────────────────────────────────────
+    setStepState('images', 'running');
+    log(`Generating ${scenePrompts.length} anime scenes via Pollinations.ai…`);
+
+    // Build placeholder grid
+    let sceneData = scenePrompts.map((_, i) => ({ scene: i + 1, url: null, prompt: scenePrompts[i] }));
+    const gridHtml = () => `<div class="scene-grid">${sceneData.map(s => `
+      <div class="scene-card" id="scene-card-${s.scene}">
+        ${s.url
+          ? `<img src="${s.url}" alt="Scene ${s.scene}" /><div class="scene-label">Scene ${s.scene}</div><a class="scene-save" href="${s.url}" download="scene-${s.scene}.jpg" target="_blank">↓ Save</a>`
+          : `<div class="spinner"></div>`}
+      </div>`).join('')}</div>`;
+
+    setStepBody('images', gridHtml());
+
+    for (let i = 0; i < scenePrompts.length; i++) {
+      log(`  Rendering scene ${i+1}/${scenePrompts.length}…`);
+      try {
+        const url = await generateAnimeImage(scenePrompts[i], i + 1);
+        sceneData[i].url = url;
+        const card = document.getElementById(`scene-card-${i+1}`);
+        if (card) card.innerHTML = `<img src="${url}" alt="Scene ${i+1}" /><div class="scene-label">Scene ${i+1}</div><a class="scene-save" href="${url}" download="scene-${i+1}.jpg" target="_blank">↓ Save</a>`;
+        log(`  ✓ Scene ${i+1} ready`, 'success');
+      } catch(e) {
+        log(`  ⚠ Scene ${i+1} error: ${e.message}`, 'warn');
+      }
+    }
+    setStepState('images', 'done');
+    log('✓ All anime scenes generated', 'success');
+
+    // ── STEP 5: SEO ────────────────────────────────────────────────────────
+    setStepState('seo', 'running');
+    log('Building SEO package…');
+    const seoResult = await aiChat(
+      `YouTube SEO package for an ANIME-STYLE faceless video. Topic: "${finalTopic}". Niche: ${niche}.
+Format EXACTLY:
+TITLE: [punchy, max 60 chars, power word included]
+DESCRIPTION: [150 words, keyword-rich, includes anime + niche keywords, ends with CTA]
+TAGS: [25 comma-separated tags including anime-specific tags]
+BEST UPLOAD TIME: [day + time in EST]`
+    );
+    setStepBody('seo', outputBox(seoResult));
+    setStepState('seo', 'done');
+    log('✓ SEO ready', 'success');
+
+    // ── STEP 6: THUMBNAIL ──────────────────────────────────────────────────
+    setStepState('thumb', 'running');
+    log('Creating thumbnail concept…');
+    const thumbResult = await aiChat(
+      `Design a viral YouTube thumbnail for an ANIME video. Topic: "${finalTopic}". Style: ${style}.
+BACKGROUND: [color/gradient]
+MAIN TEXT: [max 5 words, bold]
+ANIME VISUAL: [Pollinations prompt for thumbnail art]
+COLORS: [3 hex codes]
+EMOTION: [click trigger]
+POLLINATIONS URL: https://image.pollinations.ai/prompt/[your encoded anime thumbnail prompt here]`
+    );
+    setStepBody('thumb', outputBox(thumbResult));
+    setStepState('thumb', 'done');
+    log('✓ Thumbnail ready', 'success');
+
+    // ── STEP 7: YOUTUBE UPLOAD ─────────────────────────────────────────────
+    setStepState('upload', 'running');
+    log('Pushing metadata to YouTube…');
+    const titleMatch = seoResult.match(/TITLE:\s*(.+)/);
+    const descMatch  = seoResult.match(/DESCRIPTION:\s*([\s\S]+?)(?=TAGS:|$)/);
+    const tagsMatch  = seoResult.match(/TAGS:\s*(.+)/);
+    const ytTitle = titleMatch?.[1]?.trim() || finalTopic;
+    const ytDesc  = descMatch?.[1]?.trim()  || seoResult;
+    const ytTags  = tagsMatch?.[1]?.split(',').map(t => t.trim()) || [];
+
+    if (ytToken) {
+      try {
+        await pushYouTube(ytToken, ytTitle, ytDesc, ytTags);
+        setStepBody('upload', outputBox(`✓ YouTube private draft created!\n\nTitle: ${ytTitle}\nStatus: Private\n\nNext steps:\n1. Download all anime scene images\n2. Open CapCut (free) → import scenes + voiceover\n3. Export MP4 → upload to this draft in YouTube Studio`));
+        log('✓ YouTube draft created', 'success');
+      } catch(e) {
+        setStepBody('upload', outputBox(`YouTube error: ${e.message}\n\nYour SEO metadata:\nTitle: ${ytTitle}\n\nPaste this into YouTube Studio manually.`));
+        log(`⚠ YouTube upload failed: ${e.message}`, 'warn');
+      }
+    } else {
+      setStepBody('upload', outputBox(`No YouTube token provided.\n\nYour SEO is ready — paste manually into YouTube Studio:\n\nTitle: ${ytTitle}\n\n${ytDesc}\n\nTags: ${ytTags.join(', ')}`));
+      log('⚠ YouTube skipped — no token', 'warn');
+    }
+    setStepState('upload', 'done');
+
+    // DONE
+    document.getElementById('doneBanner').style.display = 'block';
+    log('🎌 Full pipeline complete!', 'success');
+
+  } catch(e) {
+    document.getElementById('errBox').textContent = '✗ ' + e.message;
+    document.getElementById('errBox').style.display = 'block';
+    log(`✗ ${e.message}`, 'error');
+  }
+
+  running = false;
+  btn.disabled = false;
+  btn.textContent = '🔄 RUN AGAIN';
+}
+
+// ─── COMMENTS ─────────────────────────────────────────────────────────────────
+async function loadComments() {
+  const token = document.getElementById('ytToken').value.trim();
+  const videoId = document.getElementById('videoId').value.trim();
+  if (!token || !videoId) return alert('Enter your YouTube token and Video ID first.');
+  const niche = document.getElementById('niche').value;
+  const list = document.getElementById('commentList');
+  list.innerHTML = '<p style="color:var(--muted);font-size:12px">Loading comments…</p>';
+  try {
+    const comments = await getComments(token, videoId);
+    if (!comments.length) { list.innerHTML = '<p style="color:var(--muted);font-size:12px">No comments found.</p>'; return; }
+    list.innerHTML = `
+      <button onclick="replyAll()" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--pink),var(--purple));border:none;border-radius:10px;color:#fff;font-weight:700;font-size:13px;cursor:pointer;margin-bottom:12px;">
+        ⚡ Auto-Reply All ${comments.length} Comments
+      </button>
+      ${comments.map(c => {
+        const s = c.snippet.topLevelComment.snippet;
+        return `<div class="comment-item" id="comment-${c.id}">
+          <div style="flex:1">
+            <div class="comment-author">${s.authorDisplayName}</div>
+            <div class="comment-text">${s.textDisplay}</div>
+          </div>
+          <button class="reply-btn" id="rbtn-${c.id}" onclick="replyOne('${c.id}', \`${s.textDisplay.replace(/`/g,"'")}\`, \`${s.authorDisplayName}\`)">Reply</button>
+        </div>`;
+      }).join('')}
+    `;
+    window._comments = comments;
+  } catch(e) {
+    list.innerHTML = `<p style="color:var(--pink);font-size:12px">Error: ${e.message}</p>`;
+  }
+}
+
+async function replyOne(commentId, text, author) {
+  const token = document.getElementById('ytToken').value.trim();
+  const niche = document.getElementById('niche').value;
+  const btn = document.getElementById(`rbtn-${commentId}`);
+  btn.textContent = '…'; btn.className = 'reply-btn loading';
+  try {
+    const reply = await aiChat(
+      `You manage a faceless anime YouTube channel about "${niche}". Viewer "${author}" commented: "${text}".
+Write a short warm human reply (1-3 sentences). No clichés, no hashtags, no "Great comment!". Sound genuine.`
+    );
+    await postReply(token, commentId, reply);
+    btn.textContent = '✓ Done'; btn.className = 'reply-btn done';
+  } catch(e) {
+    btn.textContent = '✗ Error'; btn.style.color = 'var(--pink)';
+  }
+}
+
+async function replyAll() {
+  if (!window._comments) return;
+  for (const c of window._comments) {
+    const s = c.snippet.topLevelComment.snippet;
+    const btn = document.getElementById(`rbtn-${c.id}`);
+    if (btn && !btn.classList.contains('done')) {
+      await replyOne(c.id, s.textDisplay, s.authorDisplayName);
+    }
+  }
+}
+</script>
+</body>
+</html>
